@@ -7,3 +7,8 @@ export {
   resolveFirstPositionMidi,
   resolveFirstPositionNote,
 } from "./firstPosition.js";
+
+export {
+  VIOLIN_FOLLOW_STATES,
+  resolveViolinFollowSnapshot,
+} from "./followSnapshot.js";
