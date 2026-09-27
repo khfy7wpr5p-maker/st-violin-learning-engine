@@ -2,13 +2,15 @@
 
 ## Purpose
 
-VIOLIN-01 is a deterministic domain engine. It converts a trusted sounding pitch into
-first-position violin fingering information without owning UI, rendering, audio, or
-transport state.
+The engine is a deterministic violin-learning domain layer. VIOLIN-01 converts a
+trusted sounding pitch into first-position fingering information. VIOLIN-02 adds a
+source-neutral follow snapshot contract so a host playback system can request the
+fingering for its currently active trusted violin event without giving this engine
+transport, rendering, or audio authority.
 
 ## Boundary
 
-Input:
+VIOLIN-01 input:
 
 ```json
 {
@@ -21,7 +23,7 @@ Input:
 }
 ```
 
-Output shape:
+VIOLIN-01 output shape:
 
 ```json
 {
@@ -42,8 +44,57 @@ Output shape:
 ```
 
 The engine deliberately accepts the MusicXML pitch model rather than parsing XML.
-The host remains responsible for MusicXML safety, note identity, timing, repeats,
-ties, transposition policy, and canonical sounding pitch.
+The host remains responsible for MusicXML safety, event identity, timing, repeats,
+ties, transposition policy, target-part binding, and canonical sounding pitch.
+
+## VIOLIN-02 follow snapshot contract
+
+The host binds one package/source generation and one explicit violin target part:
+
+```json
+{
+  "packageId": "pkg-123",
+  "sourceId": "pkg-123",
+  "generation": 7,
+  "targetPartId": "P1",
+  "stringLengthMm": 328
+}
+```
+
+A playback snapshot supplies source-bound active events:
+
+```json
+{
+  "packageId": "pkg-123",
+  "sourceId": "pkg-123",
+  "generation": 7,
+  "playing": true,
+  "activeEvents": [{
+    "eventId": "P1:3:1:2",
+    "partId": "P1",
+    "measureIndex": 3,
+    "midi": 66,
+    "pitch": { "step": "F", "alter": 1, "octave": 4 }
+  }]
+}
+```
+
+`resolveViolinFollowSnapshot()` returns one of:
+
+- `AVAILABLE`
+- `NO_ACTIVE_NOTE`
+- `OUTSIDE_FIRST_POSITION`
+- `AMBIGUOUS_EVENT`
+- `STALE_EVIDENCE`
+- `UNSUPPORTED_SCORE_MAPPING`
+
+The resolver filters to `targetPartId`, verifies pitch/MIDI agreement and then
+delegates fingering to VIOLIN-01. More than one simultaneous pitched event in the
+target part is ambiguous in V1 and fails closed. Events from accompaniment parts
+are ignored.
+
+The `playing` flag is presentation metadata only. This engine never advances
+time and never starts a timer.
 
 ## First-position policy
 
@@ -85,29 +136,34 @@ instrument measurement without changing pitch/fingering semantics.
 trusted score / MusicXML
         |
         v
-Student playback timeline
+Student playback timeline  <--- single transport/time authority
         |
         +----------------------------+
         |                            |
         v                            v
 st-score-audio-engine      st-violin-learning-engine
-VIOLIN audition            fingering + fingerboard data
+VIOLIN audition/sample     follow snapshot -> fingering
         |                            |
         +-------------+--------------+
                       v
                 Student App
 ```
 
-The shared synchronization key should be the host-owned stable `noteId`.
+The shared synchronization key is the host-owned stable source event identity.
+The engine also requires package/source/generation evidence so stale callbacks
+cannot be mistaken for current fingering input.
 
-## Explicit non-goals for VIOLIN-01
+## Explicit non-goals
 
 - no Web Audio or samples
 - no duplication of `st-score-audio-engine`
+- no score transport or scheduler
 - no score rendering
 - no SVG/DOM pitch inference
+- no target-part guessing
 - no microphone/pitch detection
 - no posture or bow analysis
 - no position shifting
 - no teacher-edit UI
 - no automatic fingering optimization beyond first-position candidate ordering
+- no scheduled violin score playback; that is VIOLIN-03

@@ -43,6 +43,46 @@ where `L` is vibrating string length and `n` is the semitone distance above the 
 
 Default `L` is 328 mm and is configurable by the host.
 
+## VIOLIN-02 — Playback Follow Contract
+
+VIOLIN-02 adds a source-neutral bridge from a trusted host playback event to the
+VIOLIN-01 fingering result. The host remains the only timing authority.
+
+```js
+import { resolveViolinFollowSnapshot } from "./src/index.js";
+
+const result = resolveViolinFollowSnapshot({
+  binding: {
+    packageId: "pkg-123",
+    sourceId: "pkg-123",
+    generation: 7,
+    targetPartId: "P1"
+  },
+  snapshot: {
+    packageId: "pkg-123",
+    sourceId: "pkg-123",
+    generation: 7,
+    playing: true,
+    activeEvents: [{
+      eventId: "P1:3:1:2",
+      partId: "P1",
+      measureIndex: 3,
+      midi: 66,
+      pitch: { step: "F", alter: 1, octave: 4 }
+    }]
+  }
+});
+```
+
+The resolver:
+
+- accepts only the explicitly bound target part;
+- rejects stale package/source/generation evidence;
+- verifies MIDI against the supplied MusicXML-compatible pitch;
+- fails closed for simultaneous target-part pitches;
+- returns explicit unavailable states for rests/empty beats and unsupported pitches;
+- never creates a playback clock.
+
 ## Integration direction
 
 ```
@@ -60,7 +100,7 @@ Student playback timeline
           physical fingerboard position
 ```
 
-Audio remains owned by `st-score-audio-engine`; this repository never duplicates the violin sound engine.
+Audio remains owned by `st-score-audio-engine`; this repository never duplicates the violin sound engine. Scheduled violin score playback is a separate VIOLIN-03 concern.
 
 ## Development
 
