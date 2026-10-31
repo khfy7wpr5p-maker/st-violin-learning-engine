@@ -12,7 +12,7 @@ Current scope:
 - physically scaled stop positions using violin string length
 - alternative string candidates where first position allows them
 - MusicXML-compatible pitch input contract (`step`, `alter`, `octave`)
-- deterministic, UI-independent output for later playback/fingerboard synchronization
+- deterministic, UI-independent output used by host playback/fingerboard synchronization
 
 The engine does **not** own score rendering, MusicXML document parsing, audio playback,
 transport state, microphone analysis, or Student App UI.
@@ -83,7 +83,7 @@ The resolver:
 - returns explicit unavailable states for rests/empty beats and unsupported pitches;
 - never creates a playback clock.
 
-## Integration direction
+## Integration
 
 ```
 MusicXML / trusted score events
@@ -100,7 +100,9 @@ Student playback timeline
           physical fingerboard position
 ```
 
-Audio remains owned by `st-score-audio-engine`; this repository never duplicates the violin sound engine. Scheduled violin score playback is a separate VIOLIN-03 concern.
+Audio remains owned by `st-score-audio-engine`; this repository never duplicates the violin sound engine. VIOLIN-03 Student audio integration is recorded as complete (SES-69); scheduling remains a host responsibility.
+
+See [Architecture](docs/ARCHITECTURE.md#integration-status--2026-10-31) for integration evidence, acceptance scope, and the historical design record.
 
 ## Development
 

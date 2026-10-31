@@ -130,7 +130,7 @@ distanceMm = stringLengthMm * normalized
 The default vibrating string length is 328 mm. Hosts may provide a different
 instrument measurement without changing pitch/fingering semantics.
 
-## Integration target
+## Integration
 
 ```
 trusted score / MusicXML
@@ -166,4 +166,43 @@ cannot be mistaken for current fingering input.
 - no position shifting
 - no teacher-edit UI
 - no automatic fingering optimization beyond first-position candidate ordering
-- no scheduled violin score playback; that is VIOLIN-03
+- no scheduled violin score playback inside this domain engine; Student owns transport and integrates the separate audio engine
+
+## Integration status — 2026-10-31
+
+The first-position core and VIOLIN-02 follow snapshot are implemented on this
+repository's `main`. [PR #3](https://github.com/khfy7wpr5p-maker/st-violin-learning-engine/pull/3)
+merged the follow snapshot contract at `0ec3f3252111db10f9f381d22d29e57fa8cc2c6f`.
+
+[Student architecture](https://github.com/khfy7wpr5p-maker/st-student-app/blob/main/docs/architecture.md)
+records that exact vendored runtime revision, its provenance manifest,
+`ViolinFollowCoordinator`, and `violinFingerboard` presentation. Student owns
+source parsing, explicit target-part configuration, one `StudentPlaybackPort`
+clock, rendering, accessibility, and static offline integration. This repository
+continues to provide only source-neutral fingering and follow snapshots.
+
+Recorded delivery status:
+
+| Work | Record | Status |
+| --- | --- | --- |
+| Student follow integration | [SES-45](https://linear.app/seslitab/issue/SES-45) | Done |
+| Student violin audio integration | [SES-69](https://linear.app/seslitab/issue/SES-69) | Done |
+| Score-adjacent compact fingerboard | [SES-252](https://linear.app/seslitab/issue/SES-252) | Done |
+| Synchronized multipart audio | [SES-250](https://linear.app/seslitab/issue/SES-250) | Done; explicit user PASS |
+| Target violin follow and acceptance | [SES-251](https://linear.app/seslitab/issue/SES-251) | Done; explicit user PASS |
+| Multipart parent work | [SES-247](https://linear.app/seslitab/issue/SES-247) | Done |
+
+These are delivery and acceptance records, not a new runtime or device test run.
+SES-247 explicitly keeps broader PWA/device/string-fret VoiceOver acceptance
+separate under [SES-242](https://linear.app/seslitab/issue/SES-242); closure of the
+violin tasks must not be treated as blanket acceptance of that separate work.
+
+### Historical VIOLIN-02 design
+
+[PR #2](https://github.com/khfy7wpr5p-maker/st-violin-learning-engine/pull/2)
+contains the original specification and implementation plan. It was merged on
+2026-10-31 into `onderozudogru/violin-01-first-position-core`, not `main`.
+Its pending implementation checklists and future-tense integration descriptions
+are historical planning evidence. They are not the current backlog and should
+not be copied unchanged into the current architecture. The public contracts
+above and the linked Student architecture describe the implemented boundaries.
